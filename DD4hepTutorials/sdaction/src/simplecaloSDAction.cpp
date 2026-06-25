@@ -113,7 +113,7 @@ namespace sim {
 
     // Hands-on 5: solution
     //
-    /*
+    
     if (aStep->GetPreStepPoint()->GetGlobalTime() > 10) {
       return true;
     }
@@ -125,7 +125,7 @@ namespace sim {
       return true;
     }
     // end of Hands-on 5
-    */
+    
 
     // Create the hits and accumulate contributions from multiple steps
     //

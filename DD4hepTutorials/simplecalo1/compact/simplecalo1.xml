@@ -32,11 +32,11 @@
     <constant name="CaloLayerZ"   value="10*cm"/>
     <constant name="AbsLayerX"    value="CaloX"/>
     <constant name="AbsLayerY"    value="CaloY"/>
-    <constant name="AbsLayerZ"    value="9*cm"/>
+    <constant name="AbsLayerZ"    value="7*cm"/>
     <constant name="SensLayerX"   value="CaloX"/>
     <constant name="SensLayerY"   value="CaloY"/>
-    <constant name="SensLayerZ"   value="1.0*cm"/>
-    <constant name="LayersNumber" value="20"/>
+    <constant name="SensLayerZ"   value="3.0*cm"/>
+    <constant name="LayersNumber" value="10"/>
   </define>
 
   <includes>
