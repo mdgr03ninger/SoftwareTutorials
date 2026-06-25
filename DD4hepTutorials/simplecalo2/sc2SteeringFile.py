@@ -37,7 +37,7 @@ SIM.macroFile = ""
 ## number of events to simulate, used in batch mode
 SIM.numberOfEvents = 500
 ## Outputfile from the simulation: .slcio, edm4hep.root and .root output files are supported
-SIM.outputFile = "simplecalo_sim2.root"
+SIM.outputFile = "simplecalo_sim_additional.root"
 ## Physics list to use in simulation
 SIM.physicsList = None
 ## Verbosity use integers from 1(most) to 7(least) verbose
@@ -308,7 +308,7 @@ SIM.gun.isotrop = False
 ## Minimal momentum when using distribution (default = 0.0)
 ##SIM.gun.momentumMin = 0.0
 SIM.gun.multiplicity = 1
-SIM.gun.particle = "e-"
+SIM.gun.particle = "pi-"
 
 ## Maximal azimuthal angle for random distribution
 SIM.gun.phiMax = None

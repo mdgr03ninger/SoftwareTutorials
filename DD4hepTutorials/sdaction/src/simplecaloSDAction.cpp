@@ -113,7 +113,7 @@ namespace sim {
 
     // Hands-on 5: solution
     //
-    
+    /*
     if (aStep->GetPreStepPoint()->GetGlobalTime() > 10) {
       return true;
     }
@@ -124,6 +124,7 @@ namespace sim {
     if (std::abs(localPosition.x()) > 30. || std::abs(localPosition.y()) > 30.) {
       return true;
     }
+      */
     // end of Hands-on 5
     
 

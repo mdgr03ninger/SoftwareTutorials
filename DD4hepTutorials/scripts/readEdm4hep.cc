@@ -60,7 +60,8 @@ void readEdm4hep(const std::string& filename) {
   // Q1: which string should we use to decode the cellID for SimCalorimeterHitCollection in this file?
   // (hint: check the cellID encoding in the DD4hep XML file used for simulation)
   auto decoder = dd4hep::DDSegmentation::BitFieldCoder("calolayer:5,abslayer:1,cellid:10");
-
+  //Define Tree
+  TTree* tree = new TTree("hits", "HGCal hits");
   // define histograms
   // add more histograms as needed for your analysis
   TH1::SetDefaultSumw2(); // enable Sumw2 for all histograms
@@ -78,6 +79,28 @@ void readEdm4hep(const std::string& filename) {
   }
 
   // loop over events
+
+  // initialize variables
+    int eventID = 0;
+    float totalEnergy = 0.f;
+    float x = 0.f, y = 0.f, z = 0.f;
+    int caloLayer = 0, absLayer = 0, subCellId = 0;
+    float  energy = 0.f;
+    uint64_t cellID = 0;
+
+    //initialize tree branches
+    tree->Branch("totalEnergy", &totalEnergy, "totalEnergy/F");
+    tree->Branch("eventID", &eventID, "eventID/I");
+    tree->Branch("x", &x, "x/F");
+    tree->Branch("y", &y, "y/F");
+    tree->Branch("z", &z, "z/F");
+    tree->Branch("caloLayer", &caloLayer, "caloLayer/I");
+    tree->Branch("absLayer", &absLayer, "absLayer/I");
+    tree->Branch("subCellId", &subCellId, "subCellId/I");
+    tree->Branch("energy", &energy, "energy/F");
+
+
+
   for (unsigned int iEvt = 0; iEvt < entries; iEvt++) {
     if (iEvt % 100 == 0)
       printf("Analyzing %dth event ...\n", iEvt);
@@ -88,32 +111,43 @@ void readEdm4hep(const std::string& filename) {
     // Q2: how to get the SimCalorimeterHitCollection from the frame? (hint: check the collection name in the file)
     const auto* simHits = static_cast<const edm4hep::SimCalorimeterHitCollection*>(aframe.get("simplecaloRO"));
 
-    float totalEnergy = 0.f;
-
     // loop over hits in the event
     for (const auto& hit : *simHits) {
+
+      //Code for the extra hands on analysis
+      eventID = iEvt;
+      auto pos = hit.getPosition();
+      x = pos.x;
+      y = pos.y;
+      z = pos.z;
+
+      energy = hit.getEnergy();
+      cellID = hit.getCellID();
       // Q3: how to decode the cellID to get the calo layer, abs layer, and sub-cell id? (hint: use the bit field
       // decoder)
-      int caloLayer = decoder.get(hit.getCellID(),"calolayer");
-      int absLayer =  decoder.get(hit.getCellID(),"abslayer");
-      int subCellId = decoder.get(hit.getCellID(),"cellid");
+      caloLayer = decoder.get(cellID,"calolayer");
+      absLayer =  decoder.get(cellID,"abslayer");
+      subCellId = decoder.get(cellID,"cellid");
 
       // std::cout << "Hit energy: " << hit.getEnergy() << " GeV, CellID: " << hit.getCellID()
       //           << ", CaloLayer: " << caloLayer << ", AbsLayer: " << absLayer
       //           << ", SubCellId: " << subCellId << std::endl;
 
       // Q4: fill the histograms defined above to analyze the energy distribution, layer-wise energy sum
-      totalEnergy += hit.getEnergy();
+      totalEnergy += energy;
       
-      
-      hLayerEnergySum->Fill(static_cast<float>(caloLayer) + 0.5, hit.getEnergy());
+      // Fill the tree with the hit information
+      tree->Fill();
+
+
+      hLayerEnergySum->Fill(static_cast<float>(caloLayer) + 0.5, energy);
 
       // Q5: fill lateral shower shape per layer
       // Note: cellid = 10*x + y
-        int x = subCellId / 10;
-        int y = subCellId % 10;
+        int cellx = subCellId / 10;
+        int celly = subCellId % 10;
        unsigned int layerIndex = caloLayer - 1; // assuming caloLayer starts from 1
-       hLateralShapePerLayer[layerIndex]->Fill(static_cast<float>(x) + 0.5, static_cast<float>(y) + 0.5, hit.getEnergy());
+       hLateralShapePerLayer[layerIndex]->Fill(static_cast<float>(cellx) + 0.5, static_cast<float>(celly) + 0.5, hit.getEnergy());
 
       // Q6: how to access the contributions to each hit and fill the timing distribution of contributions? (hint: check
       // the edm4hep SimCalorimeterHit class definition for contributions) fill timing distribution of contributions
@@ -123,6 +157,7 @@ void readEdm4hep(const std::string& filename) {
         }
     } // loop hits
     hEnergy->Fill(totalEnergy);
+
   } // loop events
 
   hLayerEnergySum->Scale(1. / static_cast<float>(entries)); // average energy per layer
@@ -132,10 +167,11 @@ void readEdm4hep(const std::string& filename) {
 
   // you know how to save or display the histograms from here
   // output results
-  auto* outFile = TFile::Open("edm4hep_analysis.root", "RECREATE");
+  auto* outFile = TFile::Open("edm4hep_analysis_additonal_analysis_pi-.root", "RECREATE");
   hEnergy->Write();
   hLayerEnergySum->Write();
   hContributionTime->Write();
+  tree->Write();
 
   for (auto* hist : hLateralShapePerLayer) {
     hist->Write();
